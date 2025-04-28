@@ -1,34 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserDto } from './dto/find-user.dto';
+import { JwtGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @UseGuards(JwtGuard)
+  @Get('me')
+  findMe(@Req() req) {
+    console.log(req);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+  @Patch('me')
+  updateOne() {}
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
+  @Get('me/wishes')
+  getwishes() {}
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Get(':username')
+  findOne(@Param('username') username: string) {
+    return this.usersService.findOne(username);
   }
+  @Get(':username/wishes')
+  findOneWishes(@Param('username') username: string) {}
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Post('find')
+  @UsePipes(new ValidationPipe()) // Включаем валидацию
+  find(@Body() dto: FindUserDto) {
+    const { query } = dto;
   }
 }
