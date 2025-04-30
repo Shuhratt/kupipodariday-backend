@@ -26,6 +26,7 @@ export class Wish {
   @Column()
   link: string;
 
+  @IsUrl()
   @Column()
   image: string;
 
@@ -41,7 +42,7 @@ export class Wish {
   description: string;
 
   /** содержит cчётчик тех, кто скопировал подарок себе */
-  @Column('integer')
+  @Column('integer', { default: 0 })
   copied: number;
 
   @CreateDateColumn()

@@ -20,10 +20,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   /**
    * Метод validate должен вернуть данные пользователя
+   *
    * В JWT стратегии в качестве параметра метод получает полезную нагрузку из токена
+   *
+   * Вызывает у защищённых роутов, доступ req.user
    */
   async validate(jwtPayload: { email: string }) {
-    const user = await this.usersService.findOne(jwtPayload.email);
+    const user = await this.usersService.findOne({
+      where: { email: jwtPayload.email },
+      select: ['id', 'email', 'username']
+    });
 
     if (!user) {
       throw new UnauthorizedException('Неверный email или пароль');
