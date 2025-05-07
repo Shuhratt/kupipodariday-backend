@@ -16,11 +16,16 @@ export class AuthService {
   ) {}
 
   async singIn(dto: SigninDto) {
-    const user = await this.usersService.findOne({ where: { email: dto.email }, select: ['email', 'password'] });
+    const user = await this.usersService.findOne({ where: { username: dto.username }, select: ['email', 'password'] });
+
+    if (!user) {
+      throw new UnauthorizedException('Неверное имя или пароль');
+    }
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Неверный email или пароль');
+      throw new UnauthorizedException('Неверное имя или пароль');
     }
 
     const payload = { email: user.email };

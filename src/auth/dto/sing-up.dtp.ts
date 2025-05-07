@@ -1,10 +1,9 @@
-import { IsString, Length, IsUrl, IsOptional } from 'class-validator';
+import { IsString, Length, IsUrl, IsOptional, IsEmail } from 'class-validator';
 import { SigninDto } from './sing-in.dto';
 
 export class SignupDto extends SigninDto {
-  @IsString()
-  @Length(2, 30)
-  username: string;
+  @IsEmail()
+  email: string;
 
   @IsOptional()
   @IsString()

@@ -11,14 +11,14 @@ export class AuthController {
   /** Вход */
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  signin(@Body() dto: SigninDto) {
-    return this.authService.singIn(dto);
+  async signin(@Body() dto: SigninDto) {
+    return await this.authService.singIn(dto);
   }
 
   /** Регистрация */
   @Post('signup')
-  @HttpCode(HttpStatus.OK)
-  signup(@Body() dto: SignupDto) {
-    return this.authService.singUp(dto);
+  @HttpCode(HttpStatus.CREATED)
+  async signup(@Body() dto: SignupDto) {
+    return await this.authService.singUp(dto);
   }
 }

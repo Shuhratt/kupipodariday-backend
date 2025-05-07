@@ -1,8 +1,9 @@
-import { IsString, IsEmail, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 
 export class SigninDto {
-  @IsEmail()
-  email: string;
+  @IsString()
+  @Length(2, 30)
+  username: string;
 
   @IsString()
   @Length(6, 100)

@@ -4,8 +4,8 @@ import { PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column, Man
 
 @Entity()
 export class Offer {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   /** сумма заявки, округляется до двух знаков после запятой; */
   @Column('decimal', { precision: 10, scale: 2 })

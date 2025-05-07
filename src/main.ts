@@ -5,7 +5,7 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   // Регистрация глобального фильтра
   app.useGlobalFilters(new GlobalExceptionFilter());

@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Wishlist } from './entities/wishlist.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class WishlistsService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  constructor(@InjectRepository(Wishlist) private wishlistsRepository: Repository<Wishlist>) {}
+
+  async create(userId: number, createWishlistDto: CreateWishlistDto) {
+    const wish = this.wishlistsRepository.create({ owner: { id: userId }, ...createWishlistDto });
+    return await this.wishlistsRepository.save(wish);
   }
 
-  findAll() {
-    return `This action returns all wishlists`;
+  async findAll(userId: number) {
+    return await this.wishlistsRepository.find({ where: { owner: { id: userId } } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
+  async findOne(userId: number, wishlistId: number) {
+    return await this.wishlistsRepository.findOne({
+      where: { id: wishlistId, owner: { id: userId } },
+      relations: ['owner']
+    });
   }
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
+  async updateOne(userId: number, wishlistId: number, updateWishlistDto: UpdateWishlistDto) {
+    const wishlistByUserId = await this.wishlistsRepository.find({ where: { owner: { id: userId }, id: wishlistId } });
+
+    if (!wishlistByUserId) {
+      throw new ConflictException('Нет доступа для обновления');
+    }
+
+    return await this.wishlistsRepository.update(wishlistId, updateWishlistDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+  async removeOne(userId: number, wishlistId: number) {
+    const wishlistByUserId = await this.wishlistsRepository.find({ where: { owner: { id: userId }, id: wishlistId } });
+
+    if (!wishlistByUserId) {
+      throw new ConflictException('Нет доступа для удаления');
+    }
+
+    await this.wishlistsRepository.delete(wishlistId);
   }
 }

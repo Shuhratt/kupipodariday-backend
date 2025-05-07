@@ -7,8 +7,8 @@ import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 //объекты, которые представляют данные в базе данных.
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Length(2, 30)
   @Column()

@@ -13,16 +13,16 @@ import {
 
 @Entity()
 export class Wishlist {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Length(1, 250)
   @Column()
   name: string;
 
   @Length(1, 1500)
-  @Column()
-  descriptiom: string;
+  @Column({ default: '-' })
+  description?: string;
 
   @IsUrl()
   @Column()

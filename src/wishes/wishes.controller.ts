@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  ConflictException,
+  HttpCode,
+  HttpStatus
+} from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
@@ -16,22 +29,43 @@ export class WishesController {
   }
 
   @Get('last')
-  getWishesLast() {
-    const wishes = this.wishesService.findMany({ order: { createAt: 'DESC' } });
+  async getWishesLast() {
+    return await this.wishesService.findMany({ order: { createAt: 'DESC' } });
   }
 
   @Get('top')
-  getWishesTop() {}
+  async getWishesTop() {
+    return await this.wishesService.findMany({ order: { copied: 'DESC' } });
+  }
 
   @Get(':id')
-  getWishById(@Req() req, @Param() param) {}
+  async getWishById(@Param('id') wishId: string) {
+    return await this.wishesService.findOne({ where: { id: +wishId }, relations: ['owner', 'offers'] });
+  }
 
   @Patch(':id')
-  updateWishById(@Req() req, @Param() param) {}
+  async updateWishById(@Req() req, @Param('id') idWish: string, @Body() wish: UpdateWishDto) {
+    const userId = req.user.id;
+    return await this.wishesService.updateOne(userId, idWish, wish);
+  }
 
   @Delete(':id')
-  deleteByWishId(@Req() req, @Param() param) {}
+  @HttpCode(HttpStatus.OK)
+  async deleteByWishId(@Req() req, @Param('id') wishId: string) {
+    const userId = req.user.id;
+    const wishById = await this.wishesService.findOne({ where: { id: +wishId, owner: { id: userId } } });
+
+    if (!wishById) {
+      throw new ConflictException('Нет доступа для удаления');
+    }
+
+    await this.wishesService.removeOne(wishId);
+  }
 
   @Post(':id/copy')
-  wishCopy(@Req() req, @Param() param) {}
+  @HttpCode(HttpStatus.CREATED)
+  async wishCopy(@Req() req, @Param('id') wishId: string) {
+    const userId = req.user.id;
+    await this.wishesService.copyWish(userId, +wishId);
+  }
 }

@@ -15,6 +15,7 @@ import { FindUserDto } from './dto/find-user.dto';
 import { JwtGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WishesService } from 'src/wishes/wishes.service';
+import * as bcrypt from 'bcrypt';
 
 @Controller('users')
 @UseGuards(JwtGuard)
@@ -41,9 +42,10 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
     }
-    //TODO: пользователь может редактировать только свой профиль, при изменении пароля не забывайте хешировать его
 
-    return await this.usersService.save({ id: userId, ...body });
+    const passwordHash = await bcrypt.hash(body.password, 10);
+
+    return await this.usersService.save({ id: userId, ...body, password: passwordHash });
   }
 
   @Get('me/wishes')

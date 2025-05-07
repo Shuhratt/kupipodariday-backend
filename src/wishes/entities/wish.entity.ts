@@ -15,8 +15,8 @@ import {
 
 @Entity()
 export class Wish {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Length(1, 250)
   @Column()
@@ -34,7 +34,7 @@ export class Wish {
   price: number;
 
   /** cумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок */
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   raised: number;
 
   @Length(1, 1024)
