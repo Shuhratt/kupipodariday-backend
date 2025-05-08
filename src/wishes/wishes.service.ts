@@ -40,17 +40,17 @@ export class WishesService {
   }
 
   async copyWish(userId: number, wishId: number) {
-    return this.dataSource.transaction(async (manager) => {
+    return await this.dataSource.transaction(async (manager) => {
       const wishById = await manager.findOne(Wish, { where: { id: wishId } });
 
       if (!wishById) {
         throw new NotFoundException('Не найдено');
       }
 
-      const { id: idCopyWish, name, link, image, price, description, copied } = wishById;
+      const { id: idCopyWish, name, link, image, price, description } = wishById;
 
       await manager.save(Wish, { name, link, image, price, description, owner: { id: userId } });
-      await manager.update(Wish, idCopyWish, { copied: copied + 1 });
+      await manager.update(Wish, idCopyWish, { copied: () => `copied + 1` });
     });
   }
 }

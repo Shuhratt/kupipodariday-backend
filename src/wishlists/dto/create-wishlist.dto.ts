@@ -9,5 +9,5 @@ export class CreateWishlistDto {
 
   @IsArray()
   @IsNotEmpty()
-  itemsId: string[];
+  itemsId: number[];
 }

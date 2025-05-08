@@ -27,7 +27,8 @@ export class UsersController {
 
   @Get('me')
   async findMe(@Req() req) {
-    const user = await this.usersService.findOne({ where: { id: req.user.id } });
+    const userId = req.user.id;
+    const user = await this.usersService.findOne({ where: { id: userId } });
     return user;
   }
 
@@ -43,9 +44,16 @@ export class UsersController {
       throw new NotFoundException('Пользователь не найден');
     }
 
-    const passwordHash = await bcrypt.hash(body.password, 10);
+    const newData = {
+      ...body
+    };
 
-    return await this.usersService.save({ id: userId, ...body, password: passwordHash });
+    if (body.password) {
+      const passwordHash = await bcrypt.hash(body.password, 10);
+      newData.password = passwordHash;
+    }
+
+    return await this.usersService.save({ id: userId, ...newData });
   }
 
   @Get('me/wishes')
@@ -57,21 +65,12 @@ export class UsersController {
       order: { createAt: 'DESC' }
     });
 
-    if (!wishesByUser) {
-      throw new NotFoundException('Не найдено');
-    }
-
     return wishesByUser;
   }
 
   @Get(':username')
   async findUserByName(@Param('username') username: string) {
     const users = await this.usersService.findMany({ where: { username } });
-
-    if (!users) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
     return users;
   }
 
@@ -82,10 +81,6 @@ export class UsersController {
       relations: ['owner', 'offers'],
       order: { createAt: 'DESC' }
     });
-
-    if (!wishesByUser) {
-      throw new NotFoundException('Не найдено');
-    }
 
     return wishesByUser;
   }

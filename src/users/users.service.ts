@@ -14,7 +14,7 @@ export class UsersService {
       return await this.userRepository.save(newUser);
     } catch (error) {
       if (error instanceof QueryFailedError && error.driverError?.code === '23505') {
-        throw new ConflictException('Пользователь с таким email уже существует');
+        throw new ConflictException('Пользователь с таким username и email уже существует');
       }
       throw error;
     }

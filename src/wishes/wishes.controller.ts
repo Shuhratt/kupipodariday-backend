@@ -40,7 +40,10 @@ export class WishesController {
 
   @Get(':id')
   async getWishById(@Param('id') wishId: string) {
-    return await this.wishesService.findOne({ where: { id: +wishId }, relations: ['owner', 'offers'] });
+    return await this.wishesService.findOne({
+      where: { id: +wishId },
+      relations: ['owner', 'items']
+    });
   }
 
   @Patch(':id')

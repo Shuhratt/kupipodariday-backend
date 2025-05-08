@@ -25,9 +25,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    *
    * Вызывает у защищённых роутов, доступ req.user
    */
-  async validate(jwtPayload: { email: string }) {
+  async validate(jwtPayload: { username: string }) {
     const user = await this.usersService.findOne({
-      where: { email: jwtPayload.email },
+      where: { username: jwtPayload.username },
       select: ['id', 'email', 'username']
     });
 

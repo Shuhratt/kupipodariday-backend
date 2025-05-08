@@ -8,7 +8,8 @@ import {
   ManyToMany,
   Column,
   ManyToOne,
-  Entity
+  Entity,
+  JoinTable
 } from 'typeorm';
 
 @Entity()
@@ -35,6 +36,17 @@ export class Wishlist {
   updateAt: Date;
 
   @ManyToMany(() => Wish, (wish) => wish.wishlists)
+  @JoinTable({
+    name: 'wishlist_items', // Имя промежуточной таблицы
+    joinColumn: {
+      name: 'wishlist_id', // Столбец для текущей сущности (Wishlist)
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'wish_id', // Столбец для связанной сущности (Wish)
+      referencedColumnName: 'id'
+    }
+  })
   items: Wish[];
 
   @ManyToOne(() => User, (user) => user.wishlists, { onDelete: 'CASCADE' })

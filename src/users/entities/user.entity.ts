@@ -11,7 +11,7 @@ export class User {
   id: number;
 
   @Length(2, 30)
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Length(2, 200)
@@ -23,7 +23,7 @@ export class User {
   avatar: string;
 
   @IsEmail()
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Length(6, 100)
