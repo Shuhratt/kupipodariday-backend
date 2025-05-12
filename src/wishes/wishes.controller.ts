@@ -16,8 +16,10 @@ import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { JwtGuard } from 'src/auth/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('wishes')
+@ApiBearerAuth('JWT')
 @UseGuards(JwtGuard)
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
@@ -42,7 +44,7 @@ export class WishesController {
   async getWishById(@Param('id') wishId: string) {
     return await this.wishesService.findOne({
       where: { id: +wishId },
-      relations: ['owner', 'items']
+      relations: { offers: true, owner: true, wishlists: true }
     });
   }
 

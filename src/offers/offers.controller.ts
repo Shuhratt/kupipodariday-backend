@@ -2,8 +2,10 @@ import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/comm
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { JwtGuard } from 'src/auth/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('offers')
+@ApiBearerAuth('JWT')
 @UseGuards(JwtGuard)
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}

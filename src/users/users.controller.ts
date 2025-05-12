@@ -16,8 +16,10 @@ import { JwtGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WishesService } from 'src/wishes/wishes.service';
 import * as bcrypt from 'bcrypt';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiBearerAuth('JWT')
 @UseGuards(JwtGuard)
 export class UsersController {
   constructor(

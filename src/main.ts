@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { swaggerConfig } from './config/swagger.config';
 
+const isDev = process.env.MODE === 'development';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, { cors: isDev });
 
   // Регистрация глобального фильтра
   app.useGlobalFilters(new GlobalExceptionFilter());
@@ -22,6 +24,8 @@ async function bootstrap() {
   // Получаем ConfigService из контейнера зависимостей
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
+
+  swaggerConfig(app);
 
   await app.listen(port);
 }
