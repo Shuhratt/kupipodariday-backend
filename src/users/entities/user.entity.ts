@@ -23,7 +23,7 @@ export class User {
   avatar: string;
 
   @IsEmail()
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Length(6, 100)

@@ -12,15 +12,17 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FindUserDto } from './dto/find-user.dto';
-import { JwtGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WishesService } from 'src/wishes/wishes.service';
 import * as bcrypt from 'bcrypt';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { UserResponseDto } from './dto/user-response.dto';
+import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
+import { WishResponseDto } from 'src/wishes/dto/wish-response.dto';
+import { JwtGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
-@ApiBearerAuth('JWT')
 @UseGuards(JwtGuard)
+@ApiBearerAuth('JWT')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -28,6 +30,7 @@ export class UsersController {
   ) {}
 
   @Get('me')
+  @ApiCreatedResponse({ type: UserResponseDto })
   async findMe(@Req() req) {
     const userId = req.user.id;
     const user = await this.usersService.findOne({ where: { id: userId } });
@@ -35,6 +38,7 @@ export class UsersController {
   }
 
   @Patch('me')
+  @ApiCreatedResponse({ type: UserResponseDto })
   async updateMe(@Req() req, @Body() body: UpdateUserDto) {
     if (Object.keys(body).length === 0) {
       throw new BadRequestException('Тело запроса не должно быть пустым');
@@ -59,6 +63,7 @@ export class UsersController {
   }
 
   @Get('me/wishes')
+  @ApiCreatedResponse({ type: UserResponseDto, isArray: true })
   async getWishes(@Req() req) {
     const userId = req.user.id;
     const wishesByUser = await this.wishService.findMany({
@@ -71,12 +76,14 @@ export class UsersController {
   }
 
   @Get(':username')
+  @ApiCreatedResponse({ type: UserResponseDto, isArray: true })
   async findUserByName(@Param('username') username: string) {
     const users = await this.usersService.findMany({ where: { username } });
     return users;
   }
 
   @Get(':username/wishes')
+  @ApiCreatedResponse({ type: WishResponseDto, isArray: true })
   async findWishes(@Param('username') username: string) {
     const wishesByUser = await this.wishService.findMany({
       where: { owner: { username } },
@@ -88,6 +95,7 @@ export class UsersController {
   }
 
   @Post('find')
+  @ApiCreatedResponse({ type: UserResponseDto, isArray: true })
   async findMany(@Body() dto: FindUserDto) {
     const { query } = dto;
     const users = await this.usersService.findMany({ where: [{ email: query }, { username: query }] });

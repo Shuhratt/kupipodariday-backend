@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateWishDto } from './dto/create-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, LessThan, Repository } from 'typeorm';
 import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Injectable()
@@ -26,10 +26,12 @@ export class WishesService {
   }
 
   async updateOne(userId: string, wishId: string, wish: UpdateWishDto) {
-    const wishById = await this.wishRepository.findOne({ where: { id: +wishId, owner: { id: +userId } } });
+    const wishById = await this.wishRepository.findOne({
+      where: { id: +wishId, owner: { id: +userId }, raised: LessThan(1) } // обновить подарок на который никто не скинулся
+    });
 
     if (!wishById) {
-      throw new ConflictException('Нет доступа для обновления');
+      throw new ConflictException('Нет возможности для обновления');
     }
 
     await this.wishRepository.update(wishId, wish);

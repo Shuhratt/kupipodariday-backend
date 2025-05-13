@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { Offer } from './entities/offer.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,16 @@ export class OffersService {
 
   async create(userId: number, createOfferDto: CreateOfferDto) {
     return await this.dataSource.transaction(async (mananger) => {
+      const wish = await mananger.findOne(Wish, { where: { id: createOfferDto.itemId } });
+
+      if (wish.raised >= wish.price) {
+        throw new BadRequestException('Требуемая сумма уже собрана');
+      }
+
+      if (wish.owner.id === userId) {
+        throw new BadRequestException('Нельзя сделать предложения по своему подарку');
+      }
+
       const offer = mananger.create(Offer, {
         user: { id: userId },
         item: { id: createOfferDto.itemId },
