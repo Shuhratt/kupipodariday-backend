@@ -1,24 +1,13 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FindUserDto } from './dto/find-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WishesService } from 'src/wishes/wishes.service';
-import * as bcrypt from 'bcrypt';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
 import { WishResponseDto } from 'src/wishes/dto/wish-response.dto';
 import { JwtGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('users')
 @UseGuards(JwtGuard)
@@ -31,40 +20,22 @@ export class UsersController {
 
   @Get('me')
   @ApiCreatedResponse({ type: UserResponseDto })
-  async findMe(@Req() req) {
-    const userId = req.user.id;
+  async findMe(@Req() req: Request) {
+    const userId = req.user?.id;
     const user = await this.usersService.findOne({ where: { id: userId } });
     return user;
   }
 
   @Patch('me')
   @ApiCreatedResponse({ type: UserResponseDto })
-  async updateMe(@Req() req, @Body() body: UpdateUserDto) {
-    if (Object.keys(body).length === 0) {
-      throw new BadRequestException('Тело запроса не должно быть пустым');
-    }
+  async updateMe(@Req() req: Request, @Body() body: UpdateUserDto) {
     const userId = req.user.id;
-    const user = await this.usersService.findOne({ where: { id: userId } });
-
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
-    const newData = {
-      ...body
-    };
-
-    if (body.password) {
-      const passwordHash = await bcrypt.hash(body.password, 10);
-      newData.password = passwordHash;
-    }
-
-    return await this.usersService.save({ id: userId, ...newData });
+    await this.usersService.updateMe(userId, body);
   }
 
   @Get('me/wishes')
   @ApiCreatedResponse({ type: UserResponseDto, isArray: true })
-  async getWishes(@Req() req) {
+  async getWishes(@Req() req: Request) {
     const userId = req.user.id;
     const wishesByUser = await this.wishService.findMany({
       where: { owner: { id: userId } },

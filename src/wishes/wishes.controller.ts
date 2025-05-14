@@ -18,6 +18,7 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { WishResponseDto } from './dto/wish-response.dto';
 import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('wishes')
 export class WishesController {
@@ -27,7 +28,7 @@ export class WishesController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth('JWT')
   @ApiCreatedResponse({ type: WishResponseDto })
-  create(@Req() req, @Body() createWishDto: CreateWishDto) {
+  create(@Req() req: Request, @Body() createWishDto: CreateWishDto) {
     const userId = req.user.id;
     return this.wishesService.create(userId, createWishDto);
   }
@@ -58,7 +59,7 @@ export class WishesController {
   @Patch(':id')
   @UseGuards(JwtGuard)
   @ApiBearerAuth('JWT')
-  async updateWishById(@Req() req, @Param('id') idWish: string, @Body() wish: UpdateWishDto) {
+  async updateWishById(@Req() req: Request, @Param('id') idWish: string, @Body() wish: UpdateWishDto) {
     const userId = req.user.id;
     return await this.wishesService.updateOne(userId, idWish, wish);
   }
@@ -67,7 +68,7 @@ export class WishesController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.OK)
-  async deleteByWishId(@Req() req, @Param('id') wishId: string) {
+  async deleteByWishId(@Req() req: Request, @Param('id') wishId: string) {
     const userId = req.user.id;
     const wishById = await this.wishesService.findOne({ where: { id: +wishId, owner: { id: userId } } });
 
@@ -82,7 +83,7 @@ export class WishesController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.CREATED)
-  async wishCopy(@Req() req, @Param('id') wishId: string) {
+  async wishCopy(@Req() req: Request, @Param('id') wishId: string) {
     const userId = req.user.id;
     await this.wishesService.copyWish(userId, +wishId);
   }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
@@ -25,9 +25,9 @@ export class WishesService {
     return await this.wishRepository.findOne(...params);
   }
 
-  async updateOne(userId: string, wishId: string, wish: UpdateWishDto) {
+  async updateOne(userId: number, wishId: string, wish: UpdateWishDto) {
     const wishById = await this.wishRepository.findOne({
-      where: { id: +wishId, owner: { id: +userId }, raised: LessThan(1) } // обновить подарок на который никто не скинулся
+      where: { id: +wishId, owner: { id: userId }, raised: LessThan(1) } // обновить подарок на который никто не скинулся
     });
 
     if (!wishById) {
@@ -42,6 +42,7 @@ export class WishesService {
   }
 
   async copyWish(userId: number, wishId: number) {
+    //начало transaction
     return await this.dataSource.transaction(async (manager) => {
       const wishById = await manager.findOne(Wish, { where: { id: wishId } });
 
@@ -49,10 +50,25 @@ export class WishesService {
         throw new NotFoundException('Не найдено');
       }
 
-      const { id: idCopyWish, name, link, image, price, description } = wishById;
+      const { name, link, image, price, description } = wishById;
+
+      const existingCopy = await manager.findOne(Wish, {
+        where: {
+          owner: { id: userId },
+          name,
+          link,
+          image,
+          price,
+          description
+        }
+      });
+
+      if (existingCopy) {
+        throw new BadRequestException('Вы уже скопировали этот подарок');
+      }
 
       await manager.save(Wish, { name, link, image, price, description, owner: { id: userId } });
-      await manager.update(Wish, idCopyWish, { copied: () => `copied + 1` });
+      await manager.update(Wish, wishId, { copied: () => `copied + 1` });
     });
   }
 }

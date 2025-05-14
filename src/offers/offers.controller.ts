@@ -4,6 +4,7 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
 import { OfferResponseDto } from './dto/offer-response.dto';
 import { JwtGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('offers')
 @UseGuards(JwtGuard)
@@ -13,7 +14,7 @@ export class OffersController {
 
   @Post()
   @ApiCreatedResponse({ type: OfferResponseDto })
-  async create(@Req() req, @Body() createOfferDto: CreateOfferDto) {
+  async create(@Req() req: Request, @Body() createOfferDto: CreateOfferDto) {
     const userId = req.user.id;
     return this.offersService.create(userId, createOfferDto);
   }
